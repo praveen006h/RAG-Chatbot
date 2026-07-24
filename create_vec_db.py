@@ -1,4 +1,5 @@
-from langchain_community.document_loaders import DirectoryLoader
+from dotenv import load_dotenv
+from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -6,6 +7,8 @@ from langchain_community.vectorstores import Chroma
 import torch
 import os
 import shutil
+
+load_dotenv()
 
 DATA_PATH = "data"
 CHROMA_PATH = "chroma"
@@ -20,14 +23,19 @@ def generate_data_store():
     save_to_chroma(chunks)
 
 def load_documents():
-    loader = DirectoryLoader(path=DATA_PATH, glob="*.md")
+    loader = DirectoryLoader(
+        path=DATA_PATH,
+        glob="*",
+        # loader_cls=TextLoader,
+    )
     documents = loader.load()
+    print(f"Loaded {len(documents)} documents from {DATA_PATH}.")
     return documents
 
 def split_text(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size = 500,
-        chunk_overlap = 200,
+        chunk_size = 1000,
+        chunk_overlap = 300,
         length_function = len,
         add_start_index = True,
     )
